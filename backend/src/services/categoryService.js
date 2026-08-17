@@ -1,4 +1,8 @@
 const Category = require("../models/Category");
+const Location = require("../models/Location");
+const Zone = require("../models/Zone");
+const UrbanRoute = require("../models/UrbanRoute");
+const Report = require("../models/Report");
 const createError = require("./createError");
 
 const defaultCategories = [
@@ -56,6 +60,21 @@ class CategoryService {
   }
 
   async delete(id) {
+    const [locations, zones, routes, reports] = await Promise.all([
+      Location.countDocuments({ category: id }),
+      Zone.countDocuments({ category: id }),
+      UrbanRoute.countDocuments({ category: id }),
+      Report.countDocuments({ category: id })
+    ]);
+    const references = locations + zones + routes + reports;
+
+    if (references > 0) {
+      throw createError(
+        409,
+        `No se puede eliminar la categoría porque está vinculada a ${references} elemento(s). Reasigna esos elementos primero.`
+      );
+    }
+
     const category = await Category.findByIdAndDelete(id);
 
     if (!category) {

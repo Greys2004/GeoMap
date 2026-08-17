@@ -521,7 +521,7 @@
                 <span class="badge badge-status-{{ item.report.status }}">{{ item.report.status }}</span>
               </div>
               <div class="nearby-card-meta">
-                <span>Categoría: {{ item.report.category.name }}</span>
+                <span>Categoría: {{ item.report.category?.name || 'Sin categoría' }}</span>
                 <span>Distancia: <strong>{{ item.distanceKm | number:"1.2-2" }} km</strong></span>
               </div>
             </div>
@@ -738,7 +738,7 @@
                 </tr>
                 <tr *ngFor="let report of reports">
                   <td class="font-semibold">{{ report.title }}</td>
-                  <td>{{ report.category.name || 'Sin categoría' }}</td>
+                  <td>{{ report.category?.name || 'Sin categoría' }}</td>
                   <td><span class="type-pill">{{ getReportTargetTypeLabel(report) }}</span></td>
                   <td>
                     <span class="badge badge-priority-{{ report.priority }}">

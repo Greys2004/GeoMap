@@ -47,7 +47,7 @@ export interface ReportItem {
   priority: "baja" | "media" | "alta";
   status: "pendiente" | "en_proceso" | "resuelto";
   targetType: "location" | "zone" | "route";
-  category: CategoryItem;
+  category?: CategoryItem | null;
   location?: LocationItem;
   zone?: ZoneItem;
   route?: RouteItem;
