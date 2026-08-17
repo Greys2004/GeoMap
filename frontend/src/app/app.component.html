@@ -1,420 +1,857 @@
+<!-- AUTH PAGE (when not logged in) -->
 <main *ngIf="!session" class="auth-page">
-  <section class="auth-panel">
-    <div>
-      <p class="eyebrow">Proyecto final georeferenciados</p>
-      <h1>Reportes Urbanos</h1>
-      <p class="muted">
-        Sistema de reporte de baches, alumbrado, basura y señalizacion
-        para centralizar problemas de la ciudad con MongoDB.
-      </p>
-    </div>
-
-    <form class="form-card" #authNgForm="ngForm" (ngSubmit)="authNgForm.valid && submitAuth()">
-      <div class="segmented">
-        <button type="button" [class.active]="authMode === 'login'" (click)="authMode = 'login'">Login</button>
-        <button type="button" [class.active]="authMode === 'register'" (click)="authMode = 'register'">Registro</button>
+  <div class="auth-mesh-bg" aria-hidden="true"></div>
+  <section class="auth-container">
+    <div class="auth-hero">
+      <div class="brand-badge">
+        <div class="brand-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        </div>
+        <span>GeoMap Executive GIS</span>
       </div>
 
-      <label *ngIf="authMode === 'register'">
-        Nombre
-        <input name="name" [(ngModel)]="authForm.name" required>
-      </label>
+      <h1 class="hero-title">Gestión territorial inteligente y georreferenciada.</h1>
+      <p class="hero-subtitle">
+        Centraliza el reporte de baches, alumbrado público, fallas de señalización y recolección de basura con trazado de polígonos y rutas en tiempo real.
+      </p>
 
-      <label>
-        Correo
-        <input type="email" name="email" [(ngModel)]="authForm.email" required>
-      </label>
+      <!-- 3D SMART CITY ASSET DISPLAY -->
+      <div class="hero-visual-frame">
+        <img src="assets/hero-illustration.png" alt="Smart City Digital Twin Visual" class="hero-3d-image">
+        <div class="visual-overlay-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span>Monitoreo Activo MongoDB</span>
+        </div>
+      </div>
+    </div>
 
-      <label>
-        Password
-        <input type="password" name="password" [(ngModel)]="authForm.password" minlength="6" required>
-        <small class="muted">Minimo 6 caracteres.</small>
-      </label>
+    <div class="auth-card-wrapper">
+      <form class="auth-form-card" #authNgForm="ngForm" (ngSubmit)="authNgForm.valid && submitAuth()">
+        <div class="auth-card-header">
+          <span class="pulse-indicator"></span>
+          <div>
+            <h2>{{ authMode === 'login' ? 'Acceso al Sistema' : 'Registro de Cuenta' }}</h2>
+            <p>{{ authMode === 'login' ? 'Ingresa tus credenciales para acceder al centro de control.' : 'Completa el formulario para dar de alta un usuario.' }}</p>
+          </div>
+        </div>
 
-      <p class="error-text" *ngIf="error">{{ error }}</p>
-      <button class="primary-btn" [disabled]="loading || authNgForm.invalid">
-        {{ loading ? "Procesando..." : authMode === "login" ? "Entrar" : "Crear cuenta" }}
-      </button>
-    </form>
+        <div class="auth-tabs">
+          <button type="button" [class.active]="authMode === 'login'" (click)="authMode = 'login'">
+            Iniciar Sesión
+          </button>
+          <button type="button" [class.active]="authMode === 'register'" (click)="authMode = 'register'">
+            Crear Cuenta
+          </button>
+        </div>
+
+        <div class="form-fields">
+          <div class="input-field-group" *ngIf="authMode === 'register'">
+            <label for="auth-name">Nombre completo</label>
+            <div class="input-wrapper">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <input id="auth-name" name="name" [(ngModel)]="authForm.name" placeholder="Ej. Ana Martínez" required>
+            </div>
+          </div>
+
+          <div class="input-field-group">
+            <label for="auth-email">Correo institucional</label>
+            <div class="input-wrapper">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <input id="auth-email" type="email" name="email" [(ngModel)]="authForm.email" placeholder="usuario@geomap.org" required>
+            </div>
+          </div>
+
+          <div class="input-field-group">
+            <label for="auth-password">Contraseña</label>
+            <div class="input-wrapper">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <input id="auth-password" type="password" name="password" [(ngModel)]="authForm.password" minlength="6" placeholder="••••••••" required>
+            </div>
+            <span class="field-hint">Mínimo 6 caracteres requeridos</span>
+          </div>
+
+          <div class="error-alert" *ngIf="error">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>{{ error }}</span>
+          </div>
+
+          <button type="submit" class="btn-submit" [disabled]="loading || authNgForm.invalid">
+            <span *ngIf="loading" class="spinner"></span>
+            <span>{{ loading ? "Autenticando..." : authMode === "login" ? "Ingresar al Panel" : "Registrar Cuenta" }}</span>
+            <svg *ngIf="!loading" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </div>
+      </form>
+    </div>
   </section>
 </main>
 
+
+<!-- MAIN APP SHELL (when logged in) -->
 <main *ngIf="session" class="app-shell">
-  <header class="topbar">
-    <div>
-      <p class="eyebrow">Sistema de Reporte de Baches y Problemas Urbanos</p>
-      <h1>Reportes Urbanos</h1>
-    </div>
-    <div class="user-area">
-      <span>{{ session.user.name }}</span>
-      <button class="ghost-btn" (click)="logout()">Salir</button>
-    </div>
-  </header>
-
-  <nav class="tabs">
-    <button [class.active]="activeView === 'principal'" (click)="switchView('principal')">Principal</button>
-    <button [class.active]="activeView === 'catalogos'" (click)="switchView('catalogos')">Reportes y categorias</button>
-  </nav>
-
-  <p class="error-banner" *ngIf="error">{{ error }}</p>
-
-  <ng-container *ngIf="activeView === 'principal'">
-    <section class="stats-grid">
-      <div class="stat"><strong>{{ locations.length }}</strong><span>Problemas ubicados</span></div>
-      <div class="stat"><strong>{{ zones.length }}</strong><span>Colonias afectadas</span></div>
-      <div class="stat"><strong>{{ routes.length }}</strong><span>Rutas urbanas</span></div>
-      <div class="stat"><strong>{{ reports.length }}</strong><span>Reportes</span></div>
-    </section>
-
-    <section class="map-layout">
-      <div class="map-toolbar">
-        <button class="secondary-btn" type="button" (click)="startZoneDrawing()">Delimitar colonia afectada</button>
-        <button class="secondary-btn route-btn" type="button" (click)="startRouteDrawing()">Trazar ruta afectada</button>
-
-        <ng-container *ngIf="drawingMode === 'zone'">
-          <input placeholder="Nombre de colonia" [(ngModel)]="zoneForm.name" name="zoneName">
-          <input placeholder="Descripcion de afectacion" [(ngModel)]="zoneForm.description" name="zoneDescription">
-          <select [(ngModel)]="zoneForm.category" name="zoneCategory" (ngModelChange)="renderDraftLayer()">
-            <option value="">Sin categoria</option>
-            <option *ngFor="let category of categories" [value]="category._id">{{ category.name }}</option>
-          </select>
-          <button class="primary-btn" type="button" (click)="saveZone()">
-            {{ editingZoneId ? "Actualizar colonia" : "Guardar colonia" }}
-          </button>
-          <button class="ghost-btn" type="button" (click)="cancelZoneDrawing()">Cancelar</button>
-          <span class="status-pill">{{ draftPoints.length }} puntos</span>
-        </ng-container>
-
-        <ng-container *ngIf="drawingMode === 'route'">
-          <input placeholder="Nombre de ruta o calle" [(ngModel)]="routeForm.name" name="routeName">
-          <input placeholder="Descripcion del tramo afectado" [(ngModel)]="routeForm.description" name="routeDescription">
-          <select [(ngModel)]="routeForm.category" name="routeCategory" (ngModelChange)="renderDraftLayer()">
-            <option value="">Sin categoria</option>
-            <option *ngFor="let category of categories" [value]="category._id">{{ category.name }}</option>
-          </select>
-          <button class="primary-btn" type="button" (click)="saveRoute()">
-            {{ editingRouteId ? "Actualizar ruta" : "Guardar ruta" }}
-          </button>
-          <button class="ghost-btn" type="button" (click)="cancelRouteDrawing()">Cancelar</button>
-          <span class="status-pill">{{ draftPoints.length }} puntos</span>
-        </ng-container>
+  <!-- SIDEBAR NAVIGATION WITH 5 DISTINCT SECTIONS -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
       </div>
-      <div class="map-grid">
-        <aside class="location-card">
-          <h2>Marcar problema urbano</h2>
-          <p class="muted">Haz clic en el mapa para marcar la ubicacion exacta del bache o problema urbano.</p>
-
-          <div class="coordinate-card">
-            <div>
-              <span>Latitud</span>
-              <strong>Clic en mapa</strong>
-            </div>
-            <div>
-              <span>Longitud</span>
-              <strong>Clic en mapa</strong>
-            </div>
-          </div>
-
-          <div class="helper-list">
-            <span>Reportes cercanos</span>
-            <span>Tabla en tiempo real</span>
-            <span>Colonias afectadas</span>
-            <span>Rutas y calles afectadas</span>
-          </div>
-        </aside>
-        <div id="map" class="map-canvas"></div>
+      <div class="brand-text">
+        <strong>GeoMap</strong>
+        <span>Executive GIS Suite</span>
       </div>
-    </section>
+    </div>
 
-    <section class="panel">
-      <div class="section-header">
+    <nav class="side-nav" aria-label="Navegación principal">
+      <p class="nav-section-title">Módulos del Sistema</p>
+      
+      <!-- SECTION 1: DASHBOARD -->
+      <button [class.active]="activeView === 'dashboard'" (click)="switchView('dashboard')">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        </span>
+        <span class="nav-label">
+          <strong>Panorama General</strong>
+          <small>Métricas e Indicadores</small>
+        </span>
+      </button>
+
+      <!-- SECTION 2: MAPA INTERACTIVO -->
+      <button [class.active]="activeView === 'mapa'" (click)="switchView('mapa')">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        </span>
+        <span class="nav-label">
+          <strong>Mapa Interactivo</strong>
+          <small>Trazado de Zonas & Rutas</small>
+        </span>
+      </button>
+
+      <!-- SECTION 3: INCIDENCIAS -->
+      <button [class.active]="activeView === 'incidencias'" (click)="switchView('incidencias')">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </span>
+        <span class="nav-label">
+          <strong>Incidencias Ubicadas</strong>
+          <small>Tabla de Puntos de Mapa</small>
+        </span>
+      </button>
+
+      <!-- SECTION 4: TERRITORIOS -->
+      <button [class.active]="activeView === 'territorios'" (click)="switchView('territorios')">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        </span>
+        <span class="nav-label">
+          <strong>Colonias & Rutas</strong>
+          <small>Polígonos & Calles Afectadas</small>
+        </span>
+      </button>
+
+      <!-- SECTION 5: CATALOGOS -->
+      <button [class.active]="activeView === 'catalogos'" (click)="switchView('catalogos')">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </span>
+        <span class="nav-label">
+          <strong>Reportes & Categorías</strong>
+          <small>Gestión Administrativa</small>
+        </span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="system-status-card">
+        <span class="online-dot"></span>
         <div>
-          <h2>Problemas ubicados en el mapa</h2>
-          <p class="muted">La tabla se actualiza despues de cada cambio hecho en los popups del mapa.</p>
+          <strong>Sistema en Línea</strong>
+          <small>Base MongoDB Conectada</small>
         </div>
-        <span class="count-badge">{{ locations.length }} problemas</span>
-        <form class="search-form" (ngSubmit)="searchLocations()">
-          <input name="searchName" [(ngModel)]="searchName" placeholder="Buscar problema por nombre">
-          <button class="secondary-btn">Buscar</button>
-        </form>
+      </div>
+    </div>
+  </aside>
+
+  <!-- WORKSPACE CONTENT -->
+  <div class="workspace">
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-title">
+        <span class="eyebrow-badge">GeoMap Executive Suite</span>
+        <h1>{{ getActiveViewTitle() }}</h1>
       </div>
 
-      <div class="search-results" *ngIf="searchResults.length > 0">
-        <strong>Resultados:</strong>
-        <button
-          class="result-chip"
-          type="button"
-          *ngFor="let location of searchResults"
-          (click)="focusLocation(location)">
-          {{ location.name }} | {{ location.latitude | number:"1.5-5" }}, {{ location.longitude | number:"1.5-5" }}
+      <div class="user-profile-bar">
+        <div class="user-avatar-badge">{{ session.user.name.charAt(0) }}</div>
+        <div class="user-meta">
+          <strong>{{ session.user.name }}</strong>
+          <span class="role-badge">{{ session.user.role || 'Operador' }}</span>
+        </div>
+        <button class="logout-action-btn" (click)="logout()" title="Cerrar sesión">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span>Cerrar Sesión</span>
         </button>
       </div>
+    </header>
 
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Categoria</th>
-              <th>Descripcion</th>
-              <th>Latitud</th>
-              <th>Longitud</th>
-              <th>Reportes</th>
-              <th>Accion</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngIf="locations.length === 0">
-              <td colspan="7" class="empty-cell">Sin problemas registrados.</td>
-            </tr>
-            <tr *ngFor="let location of locations">
-              <td>{{ location.name }}</td>
-              <td>
-                <span class="color-dot" [style.background]="location.category?.color || '#60a5fa'"></span>
-                {{ getCategoryName(location.category) }}
-              </td>
-              <td>{{ location.description }}</td>
-              <td>{{ location.latitude | number:"1.6-6" }}</td>
-              <td>{{ location.longitude | number:"1.6-6" }}</td>
-              <td>{{ getReportsForTarget("location", location._id).length }}</td>
-              <td>
-                <div class="table-actions">
-                  <button class="table-btn" type="button" (click)="focusLocation(location)">Ver en mapa</button>
-                  <button class="table-btn" type="button" (click)="loadNearbyReports(location)">Ver cercanos</button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <!-- MOBILE TABS FOR 5 SECTIONS -->
+    <nav class="tabs mobile-tabs">
+      <button [class.active]="activeView === 'dashboard'" (click)="switchView('dashboard')">General</button>
+      <button [class.active]="activeView === 'mapa'" (click)="switchView('mapa')">Mapa</button>
+      <button [class.active]="activeView === 'incidencias'" (click)="switchView('incidencias')">Puntos</button>
+      <button [class.active]="activeView === 'territorios'" (click)="switchView('territorios')">Colonias</button>
+      <button [class.active]="activeView === 'catalogos'" (click)="switchView('catalogos')">Catálogos</button>
+    </nav>
 
-      <div class="nearby-panel" *ngIf="nearbyReports.length > 0">
-        <h3>Reportes cercanos en un radio de 2 km</h3>
-        <div class="nearby-card" *ngFor="let item of nearbyReports">
-          <strong>{{ item.report.title }}</strong>
-          <span>{{ item.report.category.name }} | {{ item.report.status }} | {{ item.distanceKm | number:"1.2-2" }} km</span>
+    <!-- ERROR BANNER -->
+    <div class="error-banner" *ngIf="error">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>{{ error }}</span>
+    </div>
+
+    <!-- SECTION 1: PANORAMA GENERAL (DASHBOARD) -->
+    <ng-container *ngIf="activeView === 'dashboard'">
+      <section class="dashboard-banner-card">
+        <div class="banner-content">
+          <span class="section-kicker">Centro de Monitoreo Urbano</span>
+          <h2>Resumen del Estado Territorial</h2>
+          <p>Supervisión ejecutiva de incidencias, polígonos de colonias afectadas y rutas de transporte monitoreadas en tiempo real.</p>
         </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="section-header">
-        <div>
-          <h2>CRUD de zonas y rutas</h2>
-          <p class="muted">Administra colonias afectadas y rutas urbanas trazadas sobre el mapa.</p>
+        <div class="banner-visual">
+          <img src="assets/dashboard-banner.png" alt="GIS Analytics Graphic" class="banner-img">
         </div>
-      </div>
+      </section>
 
-      <div class="catalog-grid">
-        <div>
-          <h3 class="subheading">Zonas / colonias afectadas</h3>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Categoria</th>
-                  <th>Descripcion</th>
-                  <th>Puntos</th>
-                  <th>Reportes</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngIf="zones.length === 0">
-                  <td colspan="6" class="empty-cell">Sin colonias delimitadas.</td>
-                </tr>
-                <tr *ngFor="let zone of zones">
-                  <td>{{ zone.name }}</td>
-                  <td>
-                    <span class="color-dot" [style.background]="zone.category?.color || '#2563eb'"></span>
-                    {{ getCategoryName(zone.category) }}
-                  </td>
-                  <td>{{ zone.description }}</td>
-                  <td>{{ zone.points.length }}</td>
-                  <td>{{ getReportsForTarget("zone", zone._id).length }}</td>
-                  <td>
-                    <div class="table-actions">
-                      <button class="table-btn" type="button" (click)="focusZone(zone)">Ver en mapa</button>
-                      <button class="table-btn" type="button" (click)="editZone(zone)">Editar forma</button>
-                      <button class="table-btn danger" type="button" (click)="deleteZone(zone._id)">Eliminar</button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+      <!-- METRICS STATS GRID -->
+      <section class="stats-grid">
+        <div class="stat-card stat-cyan" (click)="switchView('incidencias')" style="cursor: pointer;">
+          <div class="stat-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div class="stat-body">
+            <span class="stat-title">Incidencias Ubicadas</span>
+            <strong class="stat-value">{{ locations.length }}</strong>
+            <small class="stat-hint">Ver tabla de puntos completos</small>
           </div>
         </div>
 
-        <div>
-          <h3 class="subheading">Rutas / calles afectadas</h3>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Categoria</th>
-                  <th>Descripcion</th>
-                  <th>Puntos</th>
-                  <th>Reportes</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngIf="routes.length === 0">
-                  <td colspan="6" class="empty-cell">Sin rutas trazadas.</td>
-                </tr>
-                <tr *ngFor="let route of routes">
-                  <td>{{ route.name }}</td>
-                  <td>
-                    <span class="color-dot" [style.background]="route.category?.color || '#f97316'"></span>
-                    {{ getCategoryName(route.category) }}
-                  </td>
-                  <td>{{ route.description }}</td>
-                  <td>{{ route.points.length }}</td>
-                  <td>{{ getReportsForTarget("route", route._id).length }}</td>
-                  <td>
-                    <div class="table-actions">
-                      <button class="table-btn" type="button" (click)="focusRoute(route)">Ver en mapa</button>
-                      <button class="table-btn" type="button" (click)="editRoute(route)">Editar trazo</button>
-                      <button class="table-btn danger" type="button" (click)="deleteRoute(route._id)">Eliminar</button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+        <div class="stat-card stat-indigo" (click)="switchView('territorios')" style="cursor: pointer;">
+          <div class="stat-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="stat-body">
+            <span class="stat-title">Colonias Afectadas</span>
+            <strong class="stat-value">{{ zones.length }}</strong>
+            <small class="stat-hint">Polígonos delimitados</small>
           </div>
         </div>
-      </div>
-    </section>
-  </ng-container>
 
-  <ng-container *ngIf="activeView === 'catalogos'">
-    <div class="catalog-grid">
-      <section class="panel">
-        <h2>CRUD de reportes urbanos</h2>
-        <form class="stack-form" (ngSubmit)="saveReport()">
-          <input name="reportTitle" placeholder="Ej. Bache profundo en avenida" [(ngModel)]="reportForm.title" required>
-          <textarea name="reportDescription" placeholder="Describe el problema urbano" [(ngModel)]="reportForm.description" required></textarea>
+        <div class="stat-card stat-amber" (click)="switchView('territorios')" style="cursor: pointer;">
+          <div class="stat-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          </div>
+          <div class="stat-body">
+            <span class="stat-title">Rutas & Calles</span>
+            <strong class="stat-value">{{ routes.length }}</strong>
+            <small class="stat-hint">Trayectos trazados</small>
+          </div>
+        </div>
 
-          <div class="two-cols">
-            <select name="reportCategory" [(ngModel)]="reportForm.category" required>
-              <option value="">Categoria</option>
+        <div class="stat-card stat-teal" (click)="switchView('catalogos')" style="cursor: pointer;">
+          <div class="stat-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div class="stat-body">
+            <span class="stat-title">Reportes Registrados</span>
+            <strong class="stat-value">{{ reports.length }}</strong>
+            <small class="stat-hint">Ver casos documentados</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- DASHBOARD ACCESOS RAPIDOS -->
+      <section class="ui-panel">
+        <div class="panel-header">
+          <div class="panel-header-title">
+            <h2>Acceso Rápido a Módulos</h2>
+            <p>Selecciona una opción para gestionar cada componente del territorio.</p>
+          </div>
+        </div>
+
+        <div class="quick-access-grid">
+          <div class="quick-card" (click)="switchView('mapa')">
+            <div class="quick-card-icon icon-cyan">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+            </div>
+            <div class="quick-card-info">
+              <h3>Mapa Interactivo</h3>
+              <p>Visualiza el territorio, dibuja colonias y traza vías afectadas.</p>
+            </div>
+            <span class="quick-arrow">→</span>
+          </div>
+
+          <div class="quick-card" (click)="switchView('incidencias')">
+            <div class="quick-card-icon icon-teal">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="quick-card-info">
+              <h3>Catálogo de Incidencias</h3>
+              <p>Busca, inspecciona y filtra puntos georreferenciados.</p>
+            </div>
+            <span class="quick-arrow">→</span>
+          </div>
+
+          <div class="quick-card" (click)="switchView('territorios')">
+            <div class="quick-card-icon icon-indigo">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            </div>
+            <div class="quick-card-info">
+              <h3>Colonias & Rutas</h3>
+              <p>Edita la forma de colonias o el trazo de calles urbanas.</p>
+            </div>
+            <span class="quick-arrow">→</span>
+          </div>
+
+          <div class="quick-card" (click)="switchView('catalogos')">
+            <div class="quick-card-icon icon-amber">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div class="quick-card-info">
+              <h3>Reportes & Categorías</h3>
+              <p>Crea incidencias prioritarias y asigna colores a categorías.</p>
+            </div>
+            <span class="quick-arrow">→</span>
+          </div>
+        </div>
+      </section>
+    </ng-container>
+
+    <!-- SECTION 2: MAPA INTERACTIVO (MAPA) -->
+    <ng-container *ngIf="activeView === 'mapa'">
+      <section class="map-card-section">
+        <div class="map-card-header">
+          <div>
+            <span class="section-kicker">Explorador Territorial Interactivo</span>
+            <h2>Mapa de Incidencias Urbanas</h2>
+          </div>
+          <p>Utiliza las herramientas para trazar colonias o rutas, o haz clic en el mapa para posicionar una nueva incidencia.</p>
+        </div>
+
+        <!-- MAP TOOLBAR -->
+        <div class="map-toolbar">
+          <div class="toolbar-actions-group">
+            <button class="btn-action btn-zone" type="button" (click)="startZoneDrawing()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+              <span>Delimitar Colonia Afectada</span>
+            </button>
+
+            <button class="btn-action btn-route" type="button" (click)="startRouteDrawing()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>
+              <span>Trazar Ruta / Calle Afectada</span>
+            </button>
+          </div>
+
+          <!-- DRAWING ZONE FORM BAR -->
+          <div class="drawing-controls-inline" *ngIf="drawingMode === 'zone'">
+            <span class="drawing-badge zone-badge">Dibujando Colonia</span>
+            <input class="input-sm" placeholder="Nombre de colonia" [(ngModel)]="zoneForm.name" name="zoneName">
+            <input class="input-sm" placeholder="Descripción de afectación" [(ngModel)]="zoneForm.description" name="zoneDescription">
+            <select class="select-sm" [(ngModel)]="zoneForm.category" name="zoneCategory" (ngModelChange)="renderDraftLayer()">
+              <option value="">Sin categoría</option>
               <option *ngFor="let category of categories" [value]="category._id">{{ category.name }}</option>
             </select>
-            <select name="reportPriority" [(ngModel)]="reportForm.priority">
-              <option value="baja">Baja</option>
-              <option value="media">Media</option>
-              <option value="alta">Alta</option>
-            </select>
+
+            <button class="btn-sm btn-primary" type="button" (click)="saveZone()">
+              {{ editingZoneId ? "Actualizar colonia" : "Guardar colonia" }}
+            </button>
+            <button class="btn-sm btn-ghost" type="button" (click)="cancelZoneDrawing()">Cancelar</button>
+            <span class="status-pill">{{ draftPoints.length }} puntos</span>
           </div>
 
-          <div class="two-cols">
-            <select name="reportStatus" [(ngModel)]="reportForm.status">
-              <option value="pendiente">Pendiente</option>
-              <option value="en_proceso">En proceso</option>
-              <option value="resuelto">Resuelto</option>
+          <!-- DRAWING ROUTE FORM BAR -->
+          <div class="drawing-controls-inline" *ngIf="drawingMode === 'route'">
+            <span class="drawing-badge route-badge">Trazando Ruta</span>
+            <input class="input-sm" placeholder="Nombre de ruta o calle" [(ngModel)]="routeForm.name" name="routeName">
+            <input class="input-sm" placeholder="Descripción del tramo" [(ngModel)]="routeForm.description" name="routeDescription">
+            <select class="select-sm" [(ngModel)]="routeForm.category" name="routeCategory" (ngModelChange)="renderDraftLayer()">
+              <option value="">Sin categoría</option>
+              <option *ngFor="let category of categories" [value]="category._id">{{ category.name }}</option>
             </select>
-            <select name="reportTargetType" [(ngModel)]="reportForm.targetType" (ngModelChange)="onReportTargetTypeChange()">
-              <option value="location">Ubicacion exacta</option>
-              <option value="zone">Zona / colonia</option>
-              <option value="route">Ruta / calle</option>
-            </select>
+
+            <button class="btn-sm btn-primary" type="button" (click)="saveRoute()">
+              {{ editingRouteId ? "Actualizar ruta" : "Guardar ruta" }}
+            </button>
+            <button class="btn-sm btn-ghost" type="button" (click)="cancelRouteDrawing()">Cancelar</button>
+            <span class="status-pill">{{ draftPoints.length }} puntos</span>
+          </div>
+        </div>
+
+        <!-- MAP GRID -->
+        <div class="map-grid-layout">
+          <aside class="map-sidebar-card">
+            <span class="tool-step-badge">INSTRUCCIONES DE USO</span>
+            <h3>Registra una Incidencia</h3>
+            <p class="card-desc">Haz clic en cualquier punto del mapa para marcar la posición exacta del bache o falla urbana.</p>
+
+            <div class="coordinate-display-box">
+              <div class="coord-item">
+                <span>Latitud</span>
+                <strong>Clic en mapa</strong>
+              </div>
+              <div class="coord-item">
+                <span>Longitud</span>
+                <strong>Clic en mapa</strong>
+              </div>
+            </div>
+
+            <div class="guide-checklist">
+              <span class="check-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Ubicaciones georreferenciadas</span>
+              <span class="check-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Búsqueda por nombre</span>
+              <span class="check-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Colonias y polígonos</span>
+              <span class="check-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Rutas y calles afectadas</span>
+            </div>
+          </aside>
+
+          <!-- LEAFLET MAP CONTAINER -->
+          <div id="map" class="map-canvas"></div>
+        </div>
+      </section>
+    </ng-container>
+
+    <!-- SECTION 3: INCIDENCIAS UBICADAS (INCIDENCIAS) -->
+    <ng-container *ngIf="activeView === 'incidencias'">
+      <section class="ui-panel">
+        <div class="panel-header">
+          <div class="panel-header-title">
+            <h2>Catálogo de Incidencias Ubicadas</h2>
+            <p>Listado completo de puntos georreferenciados en el territorio.</p>
           </div>
 
-          <div class="two-cols">
-            <select name="reportTargetId" [(ngModel)]="reportForm.targetId" required>
-              <option value="">{{ getReportTargetPlaceholder() }}</option>
-              <option *ngFor="let target of getReportTargetOptions()" [value]="target._id">{{ target.name }}</option>
-            </select>
+          <div class="panel-header-actions">
+            <span class="count-badge">{{ locations.length }} ubicaciones</span>
+            <form class="search-box-form" (ngSubmit)="searchLocations()">
+              <div class="search-input-wrapper">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input name="searchName" [(ngModel)]="searchName" placeholder="Buscar por nombre de punto...">
+              </div>
+              <button type="submit" class="btn-search">Buscar</button>
+            </form>
           </div>
+        </div>
 
-          <div class="row-actions">
-            <button class="primary-btn">{{ editingReportId ? "Actualizar" : "Crear reporte" }}</button>
-            <button class="ghost-btn" type="button" *ngIf="editingReportId" (click)="resetReportForm()">Cancelar</button>
+        <div class="search-results-bar" *ngIf="searchResults.length > 0">
+          <span class="results-label">Resultados de búsqueda:</span>
+          <div class="chips-container">
+            <button
+              class="result-chip-btn"
+              type="button"
+              *ngFor="let location of searchResults"
+              (click)="focusLocation(location)">
+              <span>{{ location.name }}</span>
+              <small>({{ location.latitude | number:"1.4-4" }}, {{ location.longitude | number:"1.4-4" }})</small>
+            </button>
           </div>
-        </form>
+        </div>
 
-        <div class="table-wrapper">
-          <table>
+        <div class="table-container">
+          <table class="data-table">
             <thead>
               <tr>
-                <th>Titulo</th>
-                <th>Categoria</th>
-                <th>Tipo</th>
-                <th>Prioridad</th>
-                <th>Estado</th>
-                <th>Destino</th>
-                <th>Acciones</th>
+                <th style="width: 20%;">Nombre del Punto</th>
+                <th style="width: 18%;">Categoría</th>
+                <th style="width: 25%;">Descripción</th>
+                <th style="width: 17%;">Coordenadas (Lat, Lng)</th>
+                <th style="width: 8%;">Reportes</th>
+                <th style="width: 12%;">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let report of reports">
-                <td>{{ report.title }}</td>
-                <td>{{ report.category.name }}</td>
-                <td>{{ getReportTargetTypeLabel(report) }}</td>
-                <td>{{ report.priority }}</td>
-                <td>{{ report.status }}</td>
-                <td>{{ getReportTargetLabel(report) }}</td>
+              <tr *ngIf="locations.length === 0">
+                <td colspan="6" class="empty-cell-state">
+                  <div class="empty-box">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    <span>Sin incidencias registradas en el mapa.</span>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngFor="let location of locations">
+                <td class="font-semibold">{{ location.name }}</td>
                 <td>
-                  <div class="table-actions">
-                    <button class="table-btn" type="button" (click)="editReport(report)">Editar</button>
-                    <button class="table-btn danger" type="button" (click)="deleteReport(report._id)">Eliminar</button>
+                  <span class="category-pill">
+                    <span class="color-dot" [style.background]="location.category?.color || '#0284c7'"></span>
+                    {{ getCategoryName(location.category) }}
+                  </span>
+                </td>
+                <td class="cell-desc">{{ location.description || 'Sin descripción' }}</td>
+                <td class="cell-coords">{{ location.latitude | number:"1.5-5" }}, {{ location.longitude | number:"1.5-5" }}</td>
+                <td>
+                  <span class="report-count-tag">{{ getReportsForTarget("location", location._id).length }}</span>
+                </td>
+                <td>
+                  <div class="table-action-btns">
+                    <button class="tbl-btn btn-focus" type="button" (click)="focusLocation(location)">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                      Ver en Mapa
+                    </button>
+                    <button class="tbl-btn btn-nearby" type="button" (click)="loadNearbyReports(location)">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                      Cercanos
+                    </button>
                   </div>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-      </section>
 
-      <section class="panel">
-        <h2>CRUD de categorias</h2>
-        <form class="stack-form" (ngSubmit)="saveCategory()">
-          <input name="categoryName" placeholder="Bache, Alumbrado, Basura..." [(ngModel)]="categoryForm.name" required>
-          <div class="two-cols">
-            <input type="color" name="categoryColor" [(ngModel)]="categoryForm.color">
-            <select name="categoryActive" [(ngModel)]="categoryForm.active">
-              <option [ngValue]="true">Activa</option>
-              <option [ngValue]="false">Inactiva</option>
-            </select>
+        <div class="nearby-drawer-panel" *ngIf="nearbyReports.length > 0">
+          <div class="nearby-header">
+            <h3>Reportes Cercanos en Radio de 2 km</h3>
+            <span class="count-badge">{{ nearbyReports.length }} casos</span>
           </div>
-          <textarea name="categoryDescription" placeholder="Descripcion de la categoria" [(ngModel)]="categoryForm.description"></textarea>
-
-          <div class="row-actions">
-            <button class="primary-btn">{{ editingCategoryId ? "Actualizar" : "Crear categoria" }}</button>
-            <button class="ghost-btn" type="button" *ngIf="editingCategoryId" (click)="resetCategoryForm()">Cancelar</button>
+          <div class="nearby-grid">
+            <div class="nearby-item-card" *ngFor="let item of nearbyReports">
+              <div class="nearby-card-title">
+                <strong>{{ item.report.title }}</strong>
+                <span class="badge badge-status-{{ item.report.status }}">{{ item.report.status }}</span>
+              </div>
+              <div class="nearby-card-meta">
+                <span>Categoría: {{ item.report.category.name }}</span>
+                <span>Distancia: <strong>{{ item.distanceKm | number:"1.2-2" }} km</strong></span>
+              </div>
+            </div>
           </div>
-        </form>
-
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Color</th>
-                <th>Estado</th>
-                <th>Descripcion</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let category of categories">
-                <td>{{ category.name }}</td>
-                <td><span class="color-dot" [style.background]="category.color"></span>{{ category.color }}</td>
-                <td>{{ category.active ? "Activa" : "Inactiva" }}</td>
-                <td>{{ category.description }}</td>
-                <td>
-                  <div class="table-actions">
-                    <button class="table-btn" type="button" (click)="editCategory(category)">Editar</button>
-                    <button class="table-btn danger" type="button" (click)="deleteCategory(category._id)">Eliminar</button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </section>
-    </div>
-  </ng-container>
+    </ng-container>
+
+    <!-- SECTION 4: COLONIAS Y RUTAS (TERRITORIOS) -->
+    <ng-container *ngIf="activeView === 'territorios'">
+      <section class="ui-panel">
+        <div class="panel-header">
+          <div class="panel-header-title">
+            <h2>Gestión de Colonias & Rutas Urbanas</h2>
+            <p>Administra los polígonos de zonas afectadas y las calles trazadas sobre el mapa.</p>
+          </div>
+        </div>
+
+        <div class="catalog-two-columns">
+          <!-- ZONES TABLE -->
+          <div class="sub-table-card">
+            <div class="sub-card-title">
+              <div class="icon-sub icon-purple">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+              </div>
+              <h3>Colonias Afectadas (Zonas)</h3>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Puntos</th>
+                    <th>Reportes</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngIf="zones.length === 0">
+                    <td colspan="5" class="empty-cell-state">Sin colonias delimitadas.</td>
+                  </tr>
+                  <tr *ngFor="let zone of zones">
+                    <td class="font-semibold">{{ zone.name }}</td>
+                    <td>
+                      <span class="category-pill">
+                        <span class="color-dot" [style.background]="zone.category?.color || '#4f46e5'"></span>
+                        {{ getCategoryName(zone.category) }}
+                      </span>
+                    </td>
+                    <td><span class="pts-badge">{{ zone.points.length }} pts</span></td>
+                    <td><span class="report-count-tag">{{ getReportsForTarget("zone", zone._id).length }}</span></td>
+                    <td>
+                      <div class="table-action-btns">
+                        <button class="tbl-btn btn-focus" type="button" (click)="focusZone(zone)">Ver</button>
+                        <button class="tbl-btn btn-edit" type="button" (click)="editZone(zone)">Forma</button>
+                        <button class="tbl-btn btn-delete" type="button" (click)="deleteZone(zone._id)">Eliminar</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ROUTES TABLE -->
+          <div class="sub-table-card">
+            <div class="sub-card-title">
+              <div class="icon-sub icon-amber">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>
+              </div>
+              <h3>Rutas & Calles Afectadas</h3>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Puntos</th>
+                    <th>Reportes</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngIf="routes.length === 0">
+                    <td colspan="5" class="empty-cell-state">Sin rutas trazadas.</td>
+                  </tr>
+                  <tr *ngFor="let route of routes">
+                    <td class="font-semibold">{{ route.name }}</td>
+                    <td>
+                      <span class="category-pill">
+                        <span class="color-dot" [style.background]="route.category?.color || '#d97706'"></span>
+                        {{ getCategoryName(route.category) }}
+                      </span>
+                    </td>
+                    <td><span class="pts-badge">{{ route.points.length }} pts</span></td>
+                    <td><span class="report-count-tag">{{ getReportsForTarget("route", route._id).length }}</span></td>
+                    <td>
+                      <div class="table-action-btns">
+                        <button class="tbl-btn btn-focus" type="button" (click)="focusRoute(route)">Ver</button>
+                        <button class="tbl-btn btn-edit" type="button" (click)="editRoute(route)">Trazo</button>
+                        <button class="tbl-btn btn-delete" type="button" (click)="deleteRoute(route._id)">Eliminar</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </ng-container>
+
+    <!-- SECTION 5: CATALOGOS (CATALOGOS) -->
+    <ng-container *ngIf="activeView === 'catalogos'">
+      <div class="catalog-two-columns">
+        <!-- REPORTS MANAGEMENT SECTION -->
+        <section class="ui-panel catalog-panel">
+          <div class="panel-section-title">
+            <span class="step-num">01</span>
+            <div>
+              <h2>Reportes Urbanos</h2>
+              <p>Crea incidencias y vincúlalas a puntos, colonias o rutas.</p>
+            </div>
+          </div>
+
+          <form class="form-stack-card" (ngSubmit)="saveReport()">
+            <div class="input-field-group">
+              <label>Título del reporte</label>
+              <input name="reportTitle" placeholder="Ej. Bache profundo sobre avenida principal" [(ngModel)]="reportForm.title" required>
+            </div>
+
+            <div class="input-field-group">
+              <label>Descripción detallada</label>
+              <textarea name="reportDescription" placeholder="Describe la dimensión y situación del problema..." [(ngModel)]="reportForm.description" required></textarea>
+            </div>
+
+            <div class="two-cols-form">
+              <div class="input-field-group">
+                <label>Categoría</label>
+                <select name="reportCategory" [(ngModel)]="reportForm.category" required>
+                  <option value="">Selecciona categoría</option>
+                  <option *ngFor="let category of categories" [value]="category._id">{{ category.name }}</option>
+                </select>
+              </div>
+
+              <div class="input-field-group">
+                <label>Prioridad</label>
+                <select name="reportPriority" [(ngModel)]="reportForm.priority">
+                  <option value="baja">Prioridad Baja</option>
+                  <option value="media">Prioridad Media</option>
+                  <option value="alta">Prioridad Alta</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="two-cols-form">
+              <div class="input-field-group">
+                <label>Estado del caso</label>
+                <select name="reportStatus" [(ngModel)]="reportForm.status">
+                  <option value="pendiente">Pendiente</option>
+                  <option value="en_proceso">En proceso</option>
+                  <option value="resuelto">Resuelto</option>
+                </select>
+              </div>
+
+              <div class="input-field-group">
+                <label>Tipo de elemento destino</label>
+                <select name="reportTargetType" [(ngModel)]="reportForm.targetType" (ngModelChange)="onReportTargetTypeChange()">
+                  <option value="location">Ubicación exacta</option>
+                  <option value="zone">Zona / colonia</option>
+                  <option value="route">Ruta / calle</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="input-field-group">
+              <label>Seleccionar elemento vinculado</label>
+              <select name="reportTargetId" [(ngModel)]="reportForm.targetId" required>
+                <option value="">{{ getReportTargetPlaceholder() }}</option>
+                <option *ngFor="let target of getReportTargetOptions()" [value]="target._id">{{ target.name }}</option>
+              </select>
+            </div>
+
+            <div class="form-actions-row">
+              <button type="submit" class="btn-primary-form">
+                {{ editingReportId ? "Actualizar Reporte" : "Guardar Reporte" }}
+              </button>
+              <button class="btn-ghost-form" type="button" *ngIf="editingReportId" (click)="resetReportForm()">
+                Cancelar
+              </button>
+            </div>
+          </form>
+
+          <div class="table-container margin-top-table">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Título</th>
+                  <th>Categoría</th>
+                  <th>Tipo</th>
+                  <th>Prioridad</th>
+                  <th>Estado</th>
+                  <th>Destino</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="reports.length === 0">
+                  <td colspan="7" class="empty-cell-state">Sin reportes registrados.</td>
+                </tr>
+                <tr *ngFor="let report of reports">
+                  <td class="font-semibold">{{ report.title }}</td>
+                  <td>{{ report.category.name || 'Sin categoría' }}</td>
+                  <td><span class="type-pill">{{ getReportTargetTypeLabel(report) }}</span></td>
+                  <td>
+                    <span class="badge badge-priority-{{ report.priority }}">
+                      <span class="badge-dot"></span>
+                      {{ report.priority }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge badge-status-{{ report.status }}">{{ report.status }}</span>
+                  </td>
+                  <td class="cell-desc">{{ getReportTargetLabel(report) }}</td>
+                  <td>
+                    <div class="table-action-btns">
+                      <button class="tbl-btn btn-edit" type="button" (click)="editReport(report)">Editar</button>
+                      <button class="tbl-btn btn-delete" type="button" (click)="deleteReport(report._id)">Eliminar</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- CATEGORIES MANAGEMENT SECTION -->
+        <section class="ui-panel catalog-panel">
+          <div class="panel-section-title">
+            <span class="step-num">02</span>
+            <div>
+              <h2>Categorías del Sistema</h2>
+              <p>Define los colores y etiquetas para diferenciar en el mapa.</p>
+            </div>
+          </div>
+
+          <form class="form-stack-card" (ngSubmit)="saveCategory()">
+            <div class="input-field-group">
+              <label>Nombre de la categoría</label>
+              <input name="categoryName" placeholder="Ej. Bache, Alumbrado, Basura..." [(ngModel)]="categoryForm.name" required>
+            </div>
+
+            <div class="two-cols-form">
+              <div class="input-field-group">
+                <label>Color distintivo</label>
+                <div class="color-input-wrapper">
+                  <input type="color" name="categoryColor" [(ngModel)]="categoryForm.color" class="color-picker-input">
+                  <span class="color-hex-text">{{ categoryForm.color }}</span>
+                </div>
+              </div>
+
+              <div class="input-field-group">
+                <label>Estado</label>
+                <select name="categoryActive" [(ngModel)]="categoryForm.active">
+                  <option [ngValue]="true">Activa</option>
+                  <option [ngValue]="false">Inactiva</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="input-field-group">
+              <label>Descripción de categoría</label>
+              <textarea name="categoryDescription" placeholder="Breve descripción o instructivo para esta categoría..." [(ngModel)]="categoryForm.description"></textarea>
+            </div>
+
+            <div class="form-actions-row">
+              <button type="submit" class="btn-primary-form">
+                {{ editingCategoryId ? "Actualizar Categoría" : "Crear Categoría" }}
+              </button>
+              <button class="btn-ghost-form" type="button" *ngIf="editingCategoryId" (click)="resetCategoryForm()">
+                Cancelar
+              </button>
+            </div>
+          </form>
+
+          <div class="table-container margin-top-table">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Color</th>
+                  <th>Estado</th>
+                  <th>Descripción</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="categories.length === 0">
+                  <td colspan="5" class="empty-cell-state">Sin categorías registradas.</td>
+                </tr>
+                <tr *ngFor="let category of categories">
+                  <td class="font-semibold">{{ category.name }}</td>
+                  <td>
+                    <span class="color-swatch-badge">
+                      <span class="color-dot" [style.background]="category.color"></span>
+                      <code>{{ category.color }}</code>
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" [class.badge-priority-baja]="category.active" [class.badge-status-pendiente]="!category.active">
+                      {{ category.active ? "Activa" : "Inactiva" }}
+                    </span>
+                  </td>
+                  <td class="cell-desc">{{ category.description || 'Sin descripción' }}</td>
+                  <td>
+                    <div class="table-action-btns">
+                      <button class="tbl-btn btn-edit" type="button" (click)="editCategory(category)">Editar</button>
+                      <button class="tbl-btn btn-delete" type="button" (click)="deleteCategory(category._id)">Eliminar</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </ng-container>
+  </div>
 </main>

@@ -9,7 +9,7 @@ import { SessionService } from "./services/session.service";
 import { CategoryItem, LocationItem, NearbyReportItem, ReportItem, RouteItem, Session, ZoneItem, ZonePoint } from "./models/models";
 
 type AuthMode = "login" | "register";
-type AppView = "principal" | "catalogos";
+type AppView = "dashboard" | "mapa" | "incidencias" | "territorios" | "catalogos";
 type DrawMode = "zone" | "route" | "";
 type ReportTargetType = "location" | "zone" | "route";
 type PopupWindow = Window & {
@@ -35,7 +35,7 @@ export class AppComponent implements AfterViewInit {
   session: Session | null = null;
   authMode: AuthMode = "login";
   authForm = { name: "", email: "", password: "" };
-  activeView: AppView = "principal";
+  activeView: AppView = "dashboard";
   loading = false;
   error = "";
 
@@ -69,7 +69,7 @@ export class AppComponent implements AfterViewInit {
   categoryForm = {
     name: "",
     description: "",
-    color: "#60a5fa",
+    color: "#0284c7",
     active: true
   };
   editingCategoryId = "";
@@ -120,20 +120,38 @@ export class AppComponent implements AfterViewInit {
   logout(): void {
     this.sessions.logout();
     this.session = null;
-    this.map?.remove();
-    this.map = undefined;
+    this.destroyMap();
   }
 
   switchView(view: AppView): void {
+    const leavingMap = this.activeView === "mapa" && view !== "mapa";
+
+    if (leavingMap) {
+      this.destroyMap();
+    }
+
     this.activeView = view;
 
-    if (view === "principal") {
+    if (view === "mapa") {
       setTimeout(() => {
         this.initMap();
-        this.map?.invalidateSize();
-        this.renderMapData();
+        setTimeout(() => {
+          this.map?.invalidateSize({ animate: false });
+          this.renderMapData();
+        });
       });
     }
+  }
+
+  getActiveViewTitle(): string {
+    const titles: Record<AppView, string> = {
+      dashboard: "Panorama General",
+      mapa: "Explorador Territorial Interactivo",
+      incidencias: "Incidencias & Puntos Ubicados",
+      territorios: "Colonias Afectadas & Rutas Urbanas",
+      catalogos: "Gestión de Reportes & Categorías"
+    };
+    return titles[this.activeView];
   }
 
   async loadAll(): Promise<void> {
@@ -168,7 +186,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   focusLocation(location: LocationItem): void {
-    this.switchView("principal");
+    this.switchView("mapa");
     setTimeout(() => {
       this.map?.setView([location.latitude, location.longitude], 16);
       this.openLocationPopup(location);
@@ -176,7 +194,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   focusZone(zone: ZoneItem): void {
-    this.switchView("principal");
+    this.switchView("mapa");
     setTimeout(() => {
       const bounds = L.latLngBounds(zone.points.map((point) => [point.lat, point.lng]));
       this.map?.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
@@ -185,7 +203,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   focusRoute(route: RouteItem): void {
-    this.switchView("principal");
+    this.switchView("mapa");
     setTimeout(() => {
       const bounds = L.latLngBounds(route.points.map((point) => [point.lat, point.lng]));
       this.map?.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
@@ -227,7 +245,7 @@ export class AppComponent implements AfterViewInit {
     }
 
     if (this.draftPoints.length < 3) {
-      alert("Marca minimo 3 puntos en el mapa.");
+      alert("Marca mínimo 3 puntos en el mapa.");
       return;
     }
 
@@ -261,7 +279,7 @@ export class AppComponent implements AfterViewInit {
     };
     this.draftPoints = [...zone.points];
     this.renderDraftLayer();
-    this.switchView("principal");
+    this.switchView("mapa");
     this.scrollToMapToolbar();
   }
 
@@ -294,7 +312,7 @@ export class AppComponent implements AfterViewInit {
     }
 
     if (this.draftPoints.length < 2) {
-      alert("Marca minimo 2 puntos en el mapa para la ruta.");
+      alert("Marca mínimo 2 puntos en el mapa para la ruta.");
       return;
     }
 
@@ -328,7 +346,7 @@ export class AppComponent implements AfterViewInit {
     };
     this.draftPoints = [...route.points];
     this.renderDraftLayer();
-    this.switchView("principal");
+    this.switchView("mapa");
     this.scrollToMapToolbar();
   }
 
@@ -424,7 +442,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   async deleteCategory(id: string): Promise<void> {
-    if (!confirm("Eliminar categoria?")) return;
+    if (!confirm("Eliminar categoría?")) return;
     await firstValueFrom(this.api.deleteCategory(id));
     await this.loadAll();
   }
@@ -434,13 +452,19 @@ export class AppComponent implements AfterViewInit {
     this.categoryForm = {
       name: "",
       description: "",
-      color: "#60a5fa",
+      color: "#0284c7",
       active: true
     };
   }
 
   private initMap(): void {
-    if (this.map || !this.session || this.activeView !== "principal") return;
+    if (!this.session || this.activeView !== "mapa") return;
+
+    if (this.map && !this.map.getContainer().isConnected) {
+      this.destroyMap();
+    }
+
+    if (this.map) return;
 
     const node = document.getElementById("map");
     if (!node) return;
@@ -467,6 +491,17 @@ export class AppComponent implements AfterViewInit {
     this.renderMapData();
   }
 
+  private destroyMap(): void {
+    this.map?.off();
+    this.map?.remove();
+    this.map = undefined;
+    this.markersLayer = undefined;
+    this.zonesLayer = undefined;
+    this.routesLayer = undefined;
+    this.draftLayer = undefined;
+    this.tempMarker = undefined;
+  }
+
   private renderMapData(): void {
     if (!this.map || !this.markersLayer || !this.zonesLayer || !this.routesLayer) return;
 
@@ -481,7 +516,7 @@ export class AppComponent implements AfterViewInit {
     });
 
     this.zones.forEach((zone) => {
-      const color = this.getCategoryColor(zone.category, "#2563eb");
+      const color = this.getCategoryColor(zone.category, "#4f46e5");
       L.polygon(zone.points.map((point) => [point.lat, point.lng]), {
         color,
         fillColor: color,
@@ -493,7 +528,7 @@ export class AppComponent implements AfterViewInit {
     });
 
     this.routes.forEach((route) => {
-      const color = this.getCategoryColor(route.category, "#f97316");
+      const color = this.getCategoryColor(route.category, "#d97706");
       L.polyline(route.points.map((point) => [point.lat, point.lng]), {
         color,
         weight: 5
@@ -514,15 +549,15 @@ export class AppComponent implements AfterViewInit {
       .addTo(this.map)
       .bindPopup(`
         <div class="popup-form">
-          <strong>Nuevo problema urbano</strong>
-          <label>Nombre<input id="popup-new-name" placeholder="Ej. Bache en avenida"></label>
-          <label>Descripcion<textarea id="popup-new-description" placeholder="Describe el problema visible"></textarea></label>
-          <label>Categoria<select id="popup-new-category">${this.categoryOptions()}</select></label>
+          <strong class="popup-title">Registrar Incidencia</strong>
+          <label>Nombre<input id="popup-new-name" placeholder="Ej. Bache profundo en av. principal"></label>
+          <label>Descripción<textarea id="popup-new-description" placeholder="Detalles o referencias del problema..."></textarea></label>
+          <label>Categoría<select id="popup-new-category">${this.categoryOptions()}</select></label>
           <div class="popup-grid">
             <label>Latitud<input id="popup-new-lat" value="${lat.toFixed(6)}"></label>
             <label>Longitud<input id="popup-new-lng" value="${lng.toFixed(6)}"></label>
           </div>
-          <button onclick="window.createLocationFromPopup()">Guardar problema</button>
+          <button onclick="window.createLocationFromPopup()">Guardar Incidencia</button>
         </div>
       `)
       .openPopup();
@@ -532,10 +567,10 @@ export class AppComponent implements AfterViewInit {
     const reports = this.reportSummary("location", location._id);
     return `
       <div class="popup-form">
-        <strong>Editar problema urbano</strong>
+        <strong class="popup-title">Editar Incidencia</strong>
         <label>Nombre<input id="popup-name-${location._id}" value="${this.escapeHtml(location.name)}"></label>
-        <label>Descripcion<textarea id="popup-description-${location._id}">${this.escapeHtml(location.description)}</textarea></label>
-        <label>Categoria<select id="popup-category-${location._id}">${this.categoryOptions(location.category?._id)}</select></label>
+        <label>Descripción<textarea id="popup-description-${location._id}">${this.escapeHtml(location.description)}</textarea></label>
+        <label>Categoría<select id="popup-category-${location._id}">${this.categoryOptions(location.category?._id)}</select></label>
         <div class="popup-grid">
           <label>Latitud<input id="popup-lat-${location._id}" value="${Number(location.latitude).toFixed(6)}"></label>
           <label>Longitud<input id="popup-lng-${location._id}" value="${Number(location.longitude).toFixed(6)}"></label>
@@ -552,12 +587,12 @@ export class AppComponent implements AfterViewInit {
   private zonePopup(zone: ZoneItem): string {
     return `
       <div class="popup-form">
-        <strong>Editar zona afectada</strong>
+        <strong class="popup-title">Editar Colonia Afectada</strong>
         <label>Nombre<input id="popup-zone-name-${zone._id}" value="${this.escapeHtml(zone.name)}"></label>
-        <label>Descripcion<textarea id="popup-zone-description-${zone._id}">${this.escapeHtml(zone.description)}</textarea></label>
-        <label>Categoria<select id="popup-zone-category-${zone._id}">${this.categoryOptions(zone.category?._id)}</select></label>
+        <label>Descripción<textarea id="popup-zone-description-${zone._id}">${this.escapeHtml(zone.description)}</textarea></label>
+        <label>Categoría<select id="popup-zone-category-${zone._id}">${this.categoryOptions(zone.category?._id)}</select></label>
         <div class="popup-meta">
-          <span>${zone.points.length} puntos delimitados</span>
+          <span>Polígono de ${zone.points.length} puntos delimitados</span>
         </div>
         ${this.reportSummary("zone", zone._id)}
         <div class="popup-actions">
@@ -572,12 +607,12 @@ export class AppComponent implements AfterViewInit {
   private routePopup(route: RouteItem): string {
     return `
       <div class="popup-form">
-        <strong>Editar ruta afectada</strong>
+        <strong class="popup-title">Editar Ruta Afectada</strong>
         <label>Nombre<input id="popup-route-name-${route._id}" value="${this.escapeHtml(route.name)}"></label>
-        <label>Descripcion<textarea id="popup-route-description-${route._id}">${this.escapeHtml(route.description)}</textarea></label>
-        <label>Categoria<select id="popup-route-category-${route._id}">${this.categoryOptions(route.category?._id)}</select></label>
+        <label>Descripción<textarea id="popup-route-description-${route._id}">${this.escapeHtml(route.description)}</textarea></label>
+        <label>Categoría<select id="popup-route-category-${route._id}">${this.categoryOptions(route.category?._id)}</select></label>
         <div class="popup-meta">
-          <span>${route.points.length} puntos trazados</span>
+          <span>Trayecto de ${route.points.length} puntos trazados</span>
         </div>
         ${this.reportSummary("route", route._id)}
         <div class="popup-actions">
@@ -596,14 +631,14 @@ export class AppComponent implements AfterViewInit {
 
     if (this.draftPoints.length > 0) {
       if (this.drawingMode === "route") {
-        const color = this.getCategoryColor(this.findCategory(this.routeForm.category), "#f97316");
+        const color = this.getCategoryColor(this.findCategory(this.routeForm.category), "#d97706");
         this.draftLayer = L.polyline(this.draftPoints.map((point) => [point.lat, point.lng]), {
           color,
           weight: 5,
           dashArray: "8 6"
         }).addTo(this.map);
       } else {
-        const color = this.getCategoryColor(this.findCategory(this.zoneForm.category), "#16a34a");
+        const color = this.getCategoryColor(this.findCategory(this.zoneForm.category), "#4f46e5");
         this.draftLayer = L.polygon(this.draftPoints.map((point) => [point.lat, point.lng]), {
           color,
           fillColor: color,
@@ -720,7 +755,7 @@ export class AppComponent implements AfterViewInit {
   getReportTargetLabel(report: ReportItem): string {
     if (report.zone) return `Zona: ${report.zone.name}`;
     if (report.route) return `Ruta: ${report.route.name}`;
-    if (report.location) return `Ubicacion: ${report.location.name}`;
+    if (report.location) return `Ubicación: ${report.location.name}`;
     return "Sin destino";
   }
 
@@ -733,11 +768,11 @@ export class AppComponent implements AfterViewInit {
   getReportTargetPlaceholder(): string {
     if (this.reportForm.targetType === "zone") return "Selecciona zona";
     if (this.reportForm.targetType === "route") return "Selecciona ruta";
-    return "Selecciona ubicacion exacta";
+    return "Selecciona ubicación exacta";
   }
 
   getCategoryName(category?: CategoryItem): string {
-    return category?.name || "Sin categoria";
+    return category?.name || "Sin categoría";
   }
 
   private getReportTargetId(report: ReportItem): string {
@@ -811,7 +846,7 @@ export class AppComponent implements AfterViewInit {
     `;
   }
 
-  private getCategoryColor(category?: CategoryItem, fallback = "#60a5fa"): string {
+  private getCategoryColor(category?: CategoryItem, fallback = "#0284c7"): string {
     return category?.color || fallback;
   }
 
@@ -819,17 +854,17 @@ export class AppComponent implements AfterViewInit {
     return this.categories.find((category) => category._id === id);
   }
 
-  private createMarkerIcon(color = "#60a5fa"): L.DivIcon {
+  private createMarkerIcon(color = "#0284c7"): L.DivIcon {
     return L.divIcon({
       className: "geo-marker",
       html: `<span style="background:${this.escapeHtml(color)}"></span>`,
-      iconSize: [24, 24],
-      iconAnchor: [12, 12]
+      iconSize: [28, 28],
+      iconAnchor: [14, 14]
     });
   }
 
   private categoryOptions(selected = ""): string {
-    const empty = `<option value="">Sin categoria</option>`;
+    const empty = `<option value="">Sin categoría</option>`;
     const options = this.categories.map((category) => {
       const isSelected = category._id === selected ? " selected" : "";
       return `<option value="${this.escapeHtml(category._id)}"${isSelected}>${this.escapeHtml(category.name)}</option>`;
@@ -839,7 +874,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   private async deleteLocationFromPopup(id: string): Promise<void> {
-    if (!confirm("Eliminar ubicacion?")) return;
+    if (!confirm("Eliminar ubicación?")) return;
     await firstValueFrom(this.api.deleteLocation(id));
     await this.loadAll();
   }
@@ -871,10 +906,10 @@ export class AppComponent implements AfterViewInit {
 
   private showError(error: unknown): void {
     if (error instanceof HttpErrorResponse) {
-      this.error = error.error?.message || error.message || "Ocurrio un error inesperado.";
+      this.error = error.error?.message || error.message || "Ocurrió un error inesperado.";
       return;
     }
 
-    this.error = error instanceof Error ? error.message : "Ocurrio un error inesperado.";
+    this.error = error instanceof Error ? error.message : "Ocurrió un error inesperado.";
   }
 }
