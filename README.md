@@ -8,7 +8,7 @@ Interactive mapping of urban incidents, including points, polygons, routes and i
 
 ![Tech](https://img.shields.io/badge/Purple_Future-Portfolio-974ECA?style=for-the-badge&labelColor=251139)
 
-[GitHub profile](https://github.com/Greys2004) · [Portfolio](https://greys2004.github.io/Curriculum/) 
+[GitHub profile](https://github.com/Greys2004) 
 
 </div>
 
