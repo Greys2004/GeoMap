@@ -1,76 +1,39 @@
-# Sistema de Reporte de Baches y Problemas Urbanos
+<div align="center">
 
-Proyecto final de Aplicacion de Sistemas Geo-referenciados.
+# ✦ GeoMap — Urban Incident Reporting
 
-## Stack
+**Georeferenced urban incident reporting, including points, areas, routes, categories and authentication.**
 
-- Frontend: Angular + Leaflet
-- Backend: Node.js + Express
-- Base de datos: MongoDB Atlas + Mongoose
-- Autenticacion: usuarios en MongoDB + JWT
-- Documentacion API: OpenAPI / Swagger en `/api-docs`
+![Documentation](https://img.shields.io/badge/Documentation-Updated-8B5CF6?style=for-the-badge) ![Project](https://img.shields.io/badge/Greys2004-Portfolio-4C1D95?style=for-the-badge)
 
-## Requisitos cubiertos
+</div>
 
-- Login y registro con usuarios guardados en MongoDB.
-- Dos CRUD internos: reportes urbanos y categorias.
-- Categorias iniciales: Bache, Alumbrado, Basura y Señalización.
-- CRUD de puntos: registro, edicion, consulta y eliminacion de ubicaciones exactas del problema desde popups del mapa.
-- CRUD de zonas: delimitar, editar, consultar y eliminar colonias afectadas.
-- CRUD de rutas: trazar, editar, consultar y eliminar calles o tramos afectados.
-- Categorias opcionales en puntos, zonas y rutas; el mapa pinta cada elemento con el color de su categoria.
-- Reportes vinculados a ubicacion exacta, zona o ruta mediante `targetType` y `targetId`.
-- Al crear o editar un reporte, la categoria se sincroniza con el punto, zona o ruta seleccionada.
-- Tabla de problemas ubicados actualizada despues de cambios en el mapa.
-- Busqueda de problemas por nombre.
-- Consulta de reportes cercanos en un radio de 2 km.
-- Trazo y guardado permanente de colonias afectadas con puntos de conexion.
-- Backend por capas: middlewares, routes, services y models.
-- Frontend con plantilla Angular.
+---
 
-## Configuracion
+## Overview
 
-1. Instalar dependencias:
+Georeferenced urban incident reporting, including points, areas, routes, categories and authentication.
+
+## Technology
+
+Angular, Leaflet, Node.js, Express, MongoDB Atlas, Mongoose and Swagger.
+
+## Local development
+
+Clone this repository and enter its directory. Then run:
 
 ```bash
 npm install
 npm run install:all
-```
-
-2. Crear `backend/.env` basado en `backend/.env.example`:
-
-```env
-PORT=4000
-MONGO_URI=mongodb+srv://usuario:password@cluster.mongodb.net/geo_apoyo?retryWrites=true&w=majority
-JWT_SECRET=un_secreto_largo
-FRONTEND_URL=http://localhost:4200
-```
-
-3. Ejecutar en desarrollo:
-
-```bash
 npm run dev
 ```
 
-4. Abrir:
+Requires Node.js 20.x and backend/.env configured from backend/.env.example. Swagger runs at /api-docs.
 
-```text
-http://localhost:4200
-```
+## Notes
 
-5. Documentacion Swagger:
+This README documents the project's verified technologies and intended use. Deployment credentials and application-specific environment values are not included. Do not commit API keys or production secrets.
 
-```text
-http://localhost:4000/api-docs
-http://localhost:4000/api-docs.json
-```
+## Author
 
-## Build para despliegue
-
-```bash
-npm run build --prefix frontend
-npm run start --prefix backend
-```
-
-El backend sirve el build de Angular desde `frontend/dist/geo-apoyo-angular/browser`.
- 
+**Greys Alexa Almanza Vega** · [GitHub](https://github.com/Greys2004) · [Portfolio](https://greys2004.github.io/Curriculum/)
