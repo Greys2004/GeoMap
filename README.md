@@ -1,26 +1,35 @@
 <div align="center">
 
-# ✦ GeoMap — Urban Incident Reporting
+# ✦ GeoMap
 
-**Georeferenced urban incident reporting, including points, areas, routes, categories and authentication.**
+### Urban incident mapping
 
-![Documentation](https://img.shields.io/badge/Documentation-Updated-8B5CF6?style=for-the-badge) ![Project](https://img.shields.io/badge/Greys2004-Portfolio-4C1D95?style=for-the-badge)
+Interactive mapping of urban incidents, including points, polygons, routes and incident reports.
+
+![Tech](https://img.shields.io/badge/Purple_Future-Portfolio-974ECA?style=for-the-badge&labelColor=251139)
+
+[GitHub profile](https://github.com/Greys2004) · [Portfolio](https://greys2004.github.io/Curriculum/) 
 
 </div>
 
 ---
 
-## Overview
+## 🖼️ Project visual
 
-Georeferenced urban incident reporting, including points, areas, routes, categories and authentication.
+<img src="frontend/src/assets/dashboard-banner.png" alt="GeoMap dashboard graphic" width="88%"/>
 
-## Technology
+## ✦ Highlights
 
-Angular, Leaflet, Node.js, Express, MongoDB Atlas, Mongoose and Swagger.
+- Map incidents with interactive Leaflet maps
+- Delimit neighborhoods and affected street routes
+- Manage incident categories and reports
+- MongoDB persistence, JWT authentication and Swagger
 
-## Local development
+## ⚙️ Technologies
 
-Clone this repository and enter its directory. Then run:
+`Angular` · `Leaflet` · `Express` · `MongoDB`
+
+## 🚀 Run locally
 
 ```bash
 npm install
@@ -28,12 +37,14 @@ npm run install:all
 npm run dev
 ```
 
-Requires Node.js 20.x and backend/.env configured from backend/.env.example. Swagger runs at /api-docs.
+Configure `backend/.env` from `backend/.env.example`; supply MongoDB connection and JWT secret securely. API docs: `/api-docs`.
 
-## Notes
+## 📌 Notes
 
-This README documents the project's verified technologies and intended use. Deployment credentials and application-specific environment values are not included. Do not commit API keys or production secrets.
+The screenshot you supplied shows the interactive urban map in León. An optimized copy of that screenshot is provided separately for upload.
 
-## Author
+Never commit production secrets or credentials.
 
-**Greys Alexa Almanza Vega** · [GitHub](https://github.com/Greys2004) · [Portfolio](https://greys2004.github.io/Curriculum/)
+---
+
+<div align="center">**Greys Alexa Almanza Vega** · Software Engineer 💜</div>
